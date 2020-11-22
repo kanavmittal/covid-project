@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coronavirus Live Tracker</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/index.css">
+
+</head>
+
+<body onload="getLocation()">
+    <div class="nav">
+        <div class="container-nav">
+            <center>
+                <h5 id='p1' style="font-size:15px; color: rgb(253, 253, 253);">Loading...</h5>
+            </center>
+        </div>
+    </div>
+
+
+    <div class="stats">
+        <h1 class="title">Novel Coronavirus Live Tracker</h1>
+        <div class="mod-1">
+
+            <div class="container">
+                <!-- Card stats -->
+                <div class="country">
+                    <div class="name">Loading...</div>
+                    <div class="change-country">Change</div>
+                    <div class="search-country hide">
+                        <div class="search-box">
+                            <input type="text" id="search-input" placeholder="Search Country..." />
+                        </div>
+                        <div class="country-list"></div>
+                    </div>
+                </div>
+                <div class="card card-stats">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted">Total Cases</h5>
+                            <div class="total-cases">
+                                <span class="h2 font-weight-bold total_cases color-red count value">0</span>
+                            </div>
+                        </div>
+                        <div class="icon icon-shape bg-gradient-red text-white rounded-circle shadow">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-stats">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted">Deaths</h5>
+                            <div class="deaths">
+                                <span class="h2 font-weight-bold deaths color-blue count value">0</span>
+                                <div class="new-value">+0</div>
+                            </div>
+
+                        </div>
+                        <div class="icon icon-shape bg-gradient-blue text-white rounded-circle shadow">
+                            <i class="fas fa-procedures"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-stats">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted">Recovered</h5>
+                            <div class="recovered">
+                                <span class="h2 font-weight-bold recovered color-green count value">0</span>
+                                <div class="new-value">+0</div>
+                            </div>
+                        </div>
+                        <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
+                            <i class="fas fa-child"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card card-stats">
+                    <!-- Card body -->
+                    <div class="card-body">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted">New Cases Today</h5>
+                            <div class="total-cases">
+                                <div class="h2 font-weight-bold total_cases color-red count new-value">+0</div>
+                            </div>
+                        </div>
+                        <div class="icon icon-shape bg-gradient-orange text-white rounded-circle shadow">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart">
+                <div class="container-chart">
+                    <div class="covid_chart">
+                        <canvas id="my_chart" width="850" height="500"></canvas>
+                        <center>
+                            <div class="range-slider">
+                                <input id='range-slider_range' class="range-slider__range" type="range" value="5" min="1" max="10">
+                                <span class="range-slider__value"><span id='range-slider_value'> 0 </span> Days</span>
+                            </div>
+                        </center>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div>
+
+
+
+
+        <div class="chart_active">
+            <div class="container-chart">
+                <div class="covid_chart">
+                    <canvas id="my_chart_active" width="850" height="500"></canvas>
+                </div>
+            </div>
+            <center>
+                <div class="button raised">
+                    <div class="center" fit>
+                        <a class="button-a" href="screening.html">Start Screening</a></div>
+                    <paper-ripple fit></paper-ripple>
+                </div>
+            </center>
+
+
+
+
+            <script>
+                var x = document.getElementById("demo");
+
+                function getLocation() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(showPosition);
+                    } else {
+                        x.innerHTML = "Geolocation is not supported by this browser.";
+                    }
+                }
+
+                function showPosition(position) {
+                    var lat = position.coords.latitude;
+                    var long = position.coords.longitude;
+                    var city;
+                    var state;
+                    var cases;
+                    async function getLoc() {
+
+                        const response_loc = await fetch(
+                            "https://api.opencagedata.com/geocode/v1/json?q=" + lat + "+" + long + "&key=085655d25bc74637b044b8232968bd69"
+                        );
+                        const loc = await response_loc.json();
+                        city = loc.results[0].components.city;
+                        state = loc.results[0].components.state;
+
+                        const response_data = await fetch(
+                            "https://api.covid19india.org/state_district_wise.json"
+                        );
+                        const data = await response_data.json();
+                        case1 = data[state].districtData[city].active;
+                        cases = parseInt(case1);
+                        if (cases <= 2000) {
+                            document.getElementById("p1").innerHTML = "You Are In Safe Zone";
+                            document.getElementById("p1").style.backgroundColor = "#7cffcb";
+                            document.getElementById("p1").style.backgroundImage = "linear-gradient(315deg, #7cffcb 0%, #74f2ce 74%)";
+                            document.getElementById("p1").style.color = "#000";
+                        } else if (cases <= 6000 && cases > 2000) {
+                            document.getElementById("p1").innerHTML = "You Are In Slightly Affected Zone";
+                            document.getElementById("p1").style.backgroundColor = "#f2cf07";
+                            document.getElementById("p1").style.backgroundImage = "linear-gradient(315deg, #f2cf07 0%, #55d284 74%)";
+
+                        } else if (cases <= 12000 && cases > 6000) {
+                            document.getElementById("p1").innerHTML = "You Are In Moderately Affected Zone";
+                            document.getElementById("p1").style.backgroundColor = "#f9484a";
+                            document.getElementById("p1").style.backgroundImage = "linear-gradient(315deg, #f9484a 0%, #fbd72b 74%)";
+                        } else {
+                            document.getElementById("p1").innerHTML = "You Are In Danger Zone";
+                            document.getElementById("p1").style.backgroundColor = "#6b0f1a";
+                            document.getElementById("p1").style.backgroundImage = "linear-gradient(315deg, #6b0f1a 0%, #b91372 74%);";
+                        }
+                    }
+
+                    getLoc();
+                }
+            </script>
+            <script src="js/countries.js"></script>
+            <script src="js/main.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+</body>
+
+</html>
